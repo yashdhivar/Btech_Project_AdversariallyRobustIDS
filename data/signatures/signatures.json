@@ -1,0 +1,422 @@
+{
+  "dos_attacks": [
+    {
+      "id": "DOS001",
+      "name": "SYN Flood",
+      "description": "High volume of SYN packets without completion",
+      "severity": "HIGH",
+      "conditions": {
+        "protocol": "TCP",
+        "syn_flag_count": {"min": 100},
+        "ack_flag_count": {"max": 5},
+        "flow_duration": {"max": 1000}
+      }
+    },
+    {
+      "id": "DOS002",
+      "name": "UDP Flood",
+      "severity": "HIGH",
+      "conditions": {
+        "protocol": "UDP",
+        "flow_packets_per_sec": {"min": 1000},
+        "total_fwd_packets": {"min": 500}
+      }
+    },
+    {
+      "id": "DOS003",
+      "name": "HTTP Flood (Slowloris)",
+      "severity": "MEDIUM",
+      "conditions": {
+        "protocol": "TCP",
+        "destination_port": 80,
+        "flow_duration": {"min": 30000},
+        "fwd_packet_length_mean": {"max": 100}
+      }
+    }
+  ],
+  "port_scan": [
+    {
+      "id": "SCAN001",
+      "name": "TCP Port Scan",
+      "severity": "MEDIUM",
+      "conditions": {
+        "protocol": "TCP",
+        "syn_flag_count": {"min": 1},
+        "rst_flag_count": {"min": 1},
+        "total_fwd_packets": {"max": 4},
+        "flow_duration": {"max": 500}
+      }
+    }
+  ],
+  "brute_force": [
+    {
+      "id": "BF001",
+      "name": "SSH Brute Force",
+      "severity": "HIGH",
+      "conditions": {
+        "destination_port": 22,
+        "protocol": "TCP",
+        "total_fwd_packets": {"min": 5, "max": 20},
+        "fwd_packet_length_mean": {"min": 50, "max": 300}
+      }
+    },
+    {
+      "id": "BF002",
+      "name": "FTP Brute Force",
+      "severity": "HIGH",
+      "conditions": {
+        "destination_port": 21,
+        "protocol": "TCP",
+        "total_fwd_packets": {"min": 5}
+      }
+    }
+  ],
+  "web_attacks": [
+    {
+      "id": "WEB001",
+      "name": "SQL Injection Attempt",
+      "severity": "CRITICAL",
+      "conditions": {
+        "destination_port": [80, 443, 8080],
+        "protocol": "TCP",
+        "fwd_packet_length_max": {"min": 500},
+        "total_fwd_packets": {"min": 3}
+      }
+    },
+    {
+      "id": "WEB002",
+      "name": "XSS Attempt",
+      "severity": "HIGH",
+      "conditions": {
+        "destination_port": [80, 443],
+        "protocol": "TCP",
+        "fwd_packet_length_mean": {"min": 200}
+      }
+    }
+  ],
+  "botnet": [
+    {
+      "id": "BOT001",
+      "name": "Botnet C2 Communication",
+      "severity": "CRITICAL",
+      "conditions": {
+        "flow_duration": {"min": 10000},
+        "flow_bytes_per_sec": {"min": 100, "max": 5000},
+        "flow_iat_mean": {"min": 5000},
+        "total_fwd_packets": {"min": 10}
+      }
+    }
+  ],
+  "nsl_kdd_rules": {
+    "dos": [
+      {
+        "id": "NSL_DOS001",
+        "name": "NSL-KDD SYN Flood",
+        "severity": "HIGH",
+        "conditions": {
+          "protocol_type": "tcp",
+          "flag": ["S0", "REJ"],
+          "src_bytes": {"max": 100},
+          "count": {"min": 100}
+        }
+      },
+      {
+        "id": "NSL_DOS002",
+        "name": "NSL-KDD Smurf Attack",
+        "severity": "HIGH",
+        "conditions": {
+          "protocol_type": "icmp",
+          "src_bytes": {"min": 500},
+          "dst_bytes": {"min": 0, "max": 10}
+        }
+      },
+      {
+        "id": "NSL_DOS003",
+        "name": "NSL-KDD Neptune Attack",
+        "severity": "HIGH",
+        "conditions": {
+          "protocol_type": "tcp",
+          "flag": "S0",
+          "src_bytes": {"max": 10},
+          "dst_bytes": {"max": 10},
+          "count": {"min": 50}
+        }
+      }
+    ],
+    "probe": [
+      {
+        "id": "NSL_PROBE001",
+        "name": "NSL-KDD Port Sweep",
+        "severity": "MEDIUM",
+        "conditions": {
+          "protocol_type": "tcp",
+          "flag": ["REJ", "RSTO"],
+          "dst_host_srv_count": {"max": 10},
+          "dst_host_same_srv_rate": {"max": 0.2}
+        }
+      },
+      {
+        "id": "NSL_PROBE002",
+        "name": "NSL-KDD Satan Probe",
+        "severity": "MEDIUM",
+        "conditions": {
+          "protocol_type": "tcp",
+          "flag": "RSTR",
+          "count": {"min": 1, "max": 10},
+          "serror_rate": {"min": 0.5}
+        }
+      }
+    ],
+    "r2l": [
+      {
+        "id": "NSL_R2L001",
+        "name": "NSL-KDD Guess Password",
+        "severity": "HIGH",
+        "conditions": {
+          "protocol_type": "tcp",
+          "service": ["ftp", "telnet", "pop_3", "imap4"],
+          "num_failed_logins": {"min": 3}
+        }
+      }
+    ],
+    "u2r": [
+      {
+        "id": "NSL_U2R001",
+        "name": "NSL-KDD Buffer Overflow",
+        "severity": "CRITICAL",
+        "conditions": {
+          "protocol_type": "tcp",
+          "num_root": {"min": 1},
+          "root_shell": 1
+        }
+      }
+    ]
+  },
+  "cicids_rules": {
+    "dos": [
+      {
+        "id": "CICIDS_DOS001",
+        "name": "CICIDS DDoS Attack",
+        "description": "Distributed Denial of Service with high packet rate and volume",
+        "severity": "CRITICAL",
+        "conditions": {
+          "Flow Packets/s": {"min": 5000},
+          "Total Fwd Packets": {"min": 500},
+          "Flow Duration": {"max": 5000000},
+          "SYN Flag Count": {"min": 50},
+          "Fwd Packet Length Mean": {"max": 200}
+        }
+      },
+      {
+        "id": "CICIDS_DOS002",
+        "name": "CICIDS DoS Hulk",
+        "description": "DoS Hulk generates high volume HTTP GET/POST flood",
+        "severity": "HIGH",
+        "conditions": {
+          "Destination Port": 80,
+          "Total Fwd Packets": {"min": 10},
+          "Fwd Packet Length Mean": {"min": 200, "max": 800},
+          "Flow Bytes/s": {"min": 50000},
+          "Flow Duration": {"min": 1000, "max": 30000000}
+        }
+      },
+      {
+        "id": "CICIDS_DOS003",
+        "name": "CICIDS DoS GoldenEye",
+        "description": "GoldenEye HTTP DoS with keep-alive connections",
+        "severity": "HIGH",
+        "conditions": {
+          "Destination Port": [80, 443],
+          "Flow Duration": {"min": 5000},
+          "Bwd Packet Length Mean": {"min": 100},
+          "Total Backward Packets": {"min": 5},
+          "Flow IAT Mean": {"min": 1000, "max": 500000},
+          "Init_Win_bytes_forward": {"min": 0, "max": 1000}
+        }
+      },
+      {
+        "id": "CICIDS_DOS004",
+        "name": "CICIDS DoS Slowloris",
+        "description": "Slowloris keeps connections open with partial HTTP headers",
+        "severity": "MEDIUM",
+        "conditions": {
+          "Destination Port": [80, 8080],
+          "Flow Duration": {"min": 30000000},
+          "Total Fwd Packets": {"min": 3, "max": 50},
+          "Fwd Packet Length Mean": {"max": 100},
+          "Flow Packets/s": {"max": 10},
+          "Fwd IAT Mean": {"min": 500000}
+        }
+      },
+      {
+        "id": "CICIDS_DOS005",
+        "name": "CICIDS DoS Slowhttptest",
+        "description": "Slow HTTP POST/READ attack holding connections open",
+        "severity": "MEDIUM",
+        "conditions": {
+          "Destination Port": [80, 443, 8080],
+          "Flow Duration": {"min": 20000000},
+          "Fwd Packet Length Mean": {"max": 150},
+          "Total Fwd Packets": {"min": 2, "max": 30},
+          "Bwd Packet Length Mean": {"max": 200},
+          "Flow Packets/s": {"max": 20}
+        }
+      },
+      {
+        "id": "CICIDS_DOS006",
+        "name": "CICIDS Heartbleed",
+        "description": "OpenSSL Heartbleed exploitation with large response payloads",
+        "severity": "CRITICAL",
+        "conditions": {
+          "Destination Port": 443,
+          "Bwd Packet Length Max": {"min": 10000},
+          "Bwd Packet Length Mean": {"min": 5000},
+          "Total Backward Packets": {"min": 1},
+          "Total Fwd Packets": {"max": 10},
+          "Flow Bytes/s": {"min": 10000}
+        }
+      }
+    ],
+    "probe": [
+      {
+        "id": "CICIDS_PROBE001",
+        "name": "CICIDS Port Scan",
+        "description": "Horizontal port scanning with SYN/RST patterns",
+        "severity": "MEDIUM",
+        "conditions": {
+          "SYN Flag Count": {"min": 1},
+          "RST Flag Count": {"min": 1},
+          "Total Fwd Packets": {"max": 4},
+          "Flow Duration": {"max": 500000},
+          "Fwd Packet Length Mean": {"max": 100},
+          "Init_Win_bytes_forward": {"min": 0, "max": 2048}
+        }
+      },
+      {
+        "id": "CICIDS_PROBE002",
+        "name": "CICIDS Slow Port Scan",
+        "description": "Stealthy port scan with longer inter-packet intervals",
+        "severity": "MEDIUM",
+        "conditions": {
+          "SYN Flag Count": {"min": 1},
+          "RST Flag Count": {"min": 1},
+          "Total Fwd Packets": {"max": 3},
+          "Flow IAT Mean": {"min": 100000},
+          "Fwd Packet Length Mean": {"max": 80}
+        }
+      }
+    ],
+    "r2l": [
+      {
+        "id": "CICIDS_R2L001",
+        "name": "CICIDS FTP Brute Force (FTP-Patator)",
+        "description": "FTP brute force login attempts via Patator tool",
+        "severity": "HIGH",
+        "conditions": {
+          "Destination Port": 21,
+          "Total Fwd Packets": {"min": 5, "max": 50},
+          "Fwd Packet Length Mean": {"min": 30, "max": 300},
+          "Flow Duration": {"min": 1000, "max": 60000000},
+          "Bwd Packet Length Mean": {"min": 20, "max": 500}
+        }
+      },
+      {
+        "id": "CICIDS_R2L002",
+        "name": "CICIDS SSH Brute Force (SSH-Patator)",
+        "description": "SSH brute force login attempts via Patator tool",
+        "severity": "HIGH",
+        "conditions": {
+          "Destination Port": 22,
+          "Total Fwd Packets": {"min": 5, "max": 40},
+          "Fwd Packet Length Mean": {"min": 40, "max": 400},
+          "Flow Duration": {"min": 1000, "max": 60000000},
+          "Init_Win_bytes_forward": {"min": 0, "max": 65535}
+        }
+      },
+      {
+        "id": "CICIDS_R2L003",
+        "name": "CICIDS Web Attack - Brute Force",
+        "description": "HTTP brute force login attempts on web applications",
+        "severity": "HIGH",
+        "conditions": {
+          "Destination Port": [80, 443, 8080],
+          "Total Fwd Packets": {"min": 5},
+          "Fwd Packet Length Mean": {"min": 200, "max": 1000},
+          "Flow Packets/s": {"min": 10},
+          "PSH Flag Count": {"min": 2}
+        }
+      },
+      {
+        "id": "CICIDS_R2L004",
+        "name": "CICIDS Web Attack - XSS",
+        "description": "Cross-site scripting payloads in HTTP requests",
+        "severity": "HIGH",
+        "conditions": {
+          "Destination Port": [80, 443],
+          "Fwd Packet Length Mean": {"min": 200},
+          "Fwd Packet Length Max": {"min": 500},
+          "Total Fwd Packets": {"min": 3},
+          "PSH Flag Count": {"min": 1}
+        }
+      },
+      {
+        "id": "CICIDS_R2L005",
+        "name": "CICIDS Web Attack - SQL Injection",
+        "description": "SQL injection payloads in HTTP requests with large query strings",
+        "severity": "CRITICAL",
+        "conditions": {
+          "Destination Port": [80, 443, 8080],
+          "Fwd Packet Length Max": {"min": 500},
+          "Fwd Packet Length Mean": {"min": 300},
+          "Total Fwd Packets": {"min": 3},
+          "PSH Flag Count": {"min": 1},
+          "ACK Flag Count": {"min": 1}
+        }
+      },
+      {
+        "id": "CICIDS_R2L006",
+        "name": "CICIDS Botnet C2",
+        "description": "Bot communicating with command and control server with periodic beaconing",
+        "severity": "CRITICAL",
+        "conditions": {
+          "Flow Duration": {"min": 10000000},
+          "Flow Bytes/s": {"min": 50, "max": 5000},
+          "Flow IAT Mean": {"min": 5000000},
+          "Total Fwd Packets": {"min": 10},
+          "Fwd IAT Mean": {"min": 3000000},
+          "Idle Mean": {"min": 5000000}
+        }
+      }
+    ],
+    "u2r": [
+      {
+        "id": "CICIDS_U2R001",
+        "name": "CICIDS Infiltration",
+        "description": "Infiltration attack with lateral movement and data exfiltration patterns",
+        "severity": "CRITICAL",
+        "conditions": {
+          "Flow Duration": {"min": 1000000},
+          "Total Fwd Packets": {"min": 10},
+          "Total Backward Packets": {"min": 5},
+          "Flow Bytes/s": {"min": 1000},
+          "Bwd Packet Length Mean": {"min": 200},
+          "Subflow Fwd Bytes": {"min": 1000}
+        }
+      },
+      {
+        "id": "CICIDS_U2R002",
+        "name": "CICIDS Infiltration - Data Exfiltration",
+        "description": "Large outbound data transfer indicative of data exfiltration",
+        "severity": "CRITICAL",
+        "conditions": {
+          "Flow Duration": {"min": 5000000},
+          "Total Fwd Packets": {"min": 20},
+          "Fwd Packet Length Mean": {"min": 500},
+          "Flow Bytes/s": {"min": 5000},
+          "Average Packet Size": {"min": 400},
+          "act_data_pkt_fwd": {"min": 10}
+        }
+      }
+    ]
+  }
+}

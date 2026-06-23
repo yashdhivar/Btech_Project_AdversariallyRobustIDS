@@ -1,0 +1,93 @@
+system:
+  name: "Adversarial Robust IDS"
+  version: "1.0"
+  log_level: "INFO"
+  log_file: "logs/ids.log"
+
+dataset:
+  # Options: "NSL-KDD", "CICIDS2017", "combined"
+  primary: "CICIDS2017"
+  path: "data/raw/CICIDS2017"
+  secondary_path: "data/raw/CICIDS2017"
+  train_split: 0.70
+  val_split: 0.15
+  test_split: 0.15
+  random_seed: 42
+
+preprocessing:
+  handle_missing: "median"
+  encoding: "onehot"
+  scaling: "standard"
+  imbalance_method: "smote"
+  top_features: 35
+
+tier1:
+  enabled: true
+  signature_db: "data/signatures/signatures.json"
+  match_threshold: 0.8
+
+tier2:
+  enabled: true
+  model_type: "DNN"
+  model_path: "models/tier2/best_model.h5"
+  confidence_threshold: 0.5
+  training:
+    epochs: 30
+    batch_size: 128
+    learning_rate: 0.001
+    optimizer: "adam"
+    early_stopping_patience: 10
+    dropout_rate: 0.3
+
+tier3:
+  enabled: true
+  robust_model_path: "models/tier3/robust_model.pth"
+  ensemble_models:
+    - "models/tier3/ensemble_dnn.h5"
+    - "models/tier3/ensemble_cnn.h5"
+    - "models/tier3/ensemble_lstm.h5"
+  adversarial_detection_threshold: 0.1
+  defense_methods:
+    - "adversarial_training"
+    - "input_transformation"
+    - "ensemble_voting"
+
+# gan:
+#   latent_dim: 100
+#   generator_hidden: [128, 256, 512]
+#   discriminator_hidden: [512, 256]
+#   epochs: 100
+#   batch_size: 64
+#   learning_rate: 0.0002
+#   beta1: 0.5
+#   beta2: 0.999
+#   gradient_penalty_weight: 10
+#   save_interval: 25
+
+adversarial_attacks:
+  fgsm:
+    epsilon: 0.1
+  pgd:
+    epsilon: 0.1
+    alpha: 0.01
+    num_iterations: 40
+  cw:
+    confidence: 0.0
+    max_iterations: 100
+    learning_rate: 0.01
+  deepfool:
+    max_iterations: 50
+
+adversarial_training:
+  epochs: 20
+  clean_ratio: 0.4
+  attack_mix:
+    fgsm: 0.3
+    pgd: 0.3
+    cw: 0.2
+    deepfool: 0.2
+
+dashboard:
+  host: "0.0.0.0"
+  port: 8501
+  refresh_interval: 2
